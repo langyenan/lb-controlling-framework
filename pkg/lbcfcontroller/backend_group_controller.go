@@ -24,8 +24,6 @@ import (
 	"sync"
 	"time"
 
-	"gopkg.in/yaml.v2"
-
 	lbcfapi "tkestack.io/lb-controlling-framework/pkg/apis/lbcf.tkestack.io/v1beta1"
 	lbcfclient "tkestack.io/lb-controlling-framework/pkg/client-go/clientset/versioned"
 	lbcflister "tkestack.io/lb-controlling-framework/pkg/client-go/listers/lbcf.tkestack.io/v1beta1"
@@ -112,7 +110,7 @@ func (c *backendGroupController) syncBackendGroup(key string) *util.SyncResult {
 	klog.Infof("=====BackendGroup %s/%s", group.Namespace, group.Name)
 	var errList util.ErrorList
 	var availableLBs []*lbcfapi.LoadBalancer
-	b, _ := yaml.Marshal(group)
+	b, _ := json.MarshalIndent(group, "", "  ")
 	klog.Infof("=====BackendGroup %s/%s yaml: %s", group.Namespace, group.Name, string(b))
 	klog.Infof("=====BackendGroup %s/%s has %d lb", group.Namespace, group.Name, len(group.Spec.GetLoadBalancers()))
 	for _, lbName := range group.Spec.GetLoadBalancers() {
