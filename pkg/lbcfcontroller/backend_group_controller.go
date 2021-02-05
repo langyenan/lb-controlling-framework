@@ -107,6 +107,7 @@ func (c *backendGroupController) syncBackendGroup(key string) *util.SyncResult {
 		return util.FinishedResult()
 	}
 
+	klog.Infof("=====BackendGroup %s/%s", group.Namespace, group.Name)
 	var errList util.ErrorList
 	var availableLBs []*lbcfapi.LoadBalancer
 	for _, lbName := range group.Spec.GetLoadBalancers() {
@@ -129,14 +130,17 @@ func (c *backendGroupController) syncBackendGroup(key string) *util.SyncResult {
 				event(c.eventRecorder, group, v1.EventTypeNormal, "GetLoadBalancerFailed", "%s", err)
 			}
 			errList = append(errList, c.deleteAllBackend(namespace, lbName, group.Name)...)
+			klog.Infof("=====BackendGroup %s/%s", group.Namespace, group.Name)
 			continue
 		} else if err != nil {
 			errList = append(errList,
 				fmt.Errorf("get LoadBalancer %s for BackendGroup %s/%s failed: %v",
 					lbName, group.Namespace, group.Name, err))
 			event(c.eventRecorder, group, v1.EventTypeWarning, "GetLoadBalancerFailed", "%v", err)
+			klog.Infof("=====BackendGroup %s/%s", group.Namespace, group.Name)
 			continue
 		} else if !util.LBCreated(lb) || !util.IsLoadBalancerAllowedForBackendGroup(lb, group.Namespace) {
+			klog.Infof("=====BackendGroup %s/%s", group.Namespace, group.Name)
 			continue
 		}
 		availableLBs = append(availableLBs, lb)
@@ -144,18 +148,24 @@ func (c *backendGroupController) syncBackendGroup(key string) *util.SyncResult {
 
 	var expectedBackends, doNotDelete []*lbcfapi.BackendRecord
 	if group.Spec.Pods != nil {
+		klog.Infof("=====BackendGroup %s/%s", group.Namespace, group.Name)
 		expectedBackends, doNotDelete, err = c.expectedPodBackends(group, availableLBs)
 	} else if group.Spec.Service != nil {
+		klog.Infof("=====BackendGroup %s/%s", group.Namespace, group.Name)
 		expectedBackends, err = c.expectedServiceBackends(group, availableLBs)
 	} else {
+		klog.Infof("=====BackendGroup %s/%s", group.Namespace, group.Name)
 		expectedBackends, err = c.expectedStaticBackends(group, availableLBs)
 	}
 	if err := c.update(group, expectedBackends, doNotDelete); err != nil {
+		klog.Infof("=====BackendGroup %s/%s", group.Namespace, group.Name)
 		errList = append(errList, err)
 	}
 	if len(errList) > 0 {
+		klog.Infof("=====BackendGroup %s/%s", group.Namespace, group.Name)
 		return util.ErrorResult(errList)
 	}
+	klog.Infof("=====BackendGroup %s/%s", group.Namespace, group.Name)
 	event(c.eventRecorder, group, v1.EventTypeNormal, "SuccSyncedBackendGroup", "Successfully synced BackendGroup")
 	return util.FinishedResult()
 }
@@ -165,8 +175,10 @@ func (c *backendGroupController) expectedPodBackends(
 	lbList []*lbcfapi.LoadBalancer) ([]*lbcfapi.BackendRecord, []*lbcfapi.BackendRecord, error) {
 	var pods []*v1.Pod
 	if group.Spec.Pods.ByLabel != nil {
+		klog.Infof("=====BackendGroup %s/%s", group.Namespace, group.Name)
 		podsInAllNameSpaces, err := c.podLister.List(labels.SelectorFromSet(labels.Set(group.Spec.Pods.ByLabel.Selector)))
 		if err != nil {
+			klog.Infof("=====BackendGroup %s/%s", group.Namespace, group.Name)
 			return nil, nil, err
 		}
 		filter := func(p *v1.Pod) bool {
@@ -178,6 +190,7 @@ func (c *backendGroupController) expectedPodBackends(
 		}
 		pods = util.FilterPods(podsInAllNameSpaces, filter)
 	} else if len(group.Spec.Pods.ByName) > 0 {
+		klog.Infof("=====BackendGroup %s/%s", group.Namespace, group.Name)
 		for _, podName := range group.Spec.Pods.ByName {
 			pod, err := c.podLister.Pods(group.Namespace).Get(podName)
 			if errors.IsNotFound(err) {
@@ -188,6 +201,7 @@ func (c *backendGroupController) expectedPodBackends(
 			pods = append(pods, pod)
 		}
 	}
+	klog.Infof("=====BackendGroup %s/%s, get %d pods", group.Namespace, group.Name, len(pods))
 
 	// handle deregister policy
 	// There are 3 available deregister policies, they specify when the pod should be deregistered:
@@ -208,7 +222,10 @@ func (c *backendGroupController) expectedPodBackends(
 	} else if util.DeregByWebhook(group) {
 		podsDoNotDereg = judgeByDriver(group, notReadyPods, c.webhookInvoker, c.driverLister, c.eventRecorder, c.dryRun)
 	}
+	klog.Infof("=====BackendGroup %s/%s has %d podsDoNotDereg", group.Namespace, group.Name, len(podsDoNotDereg))
 	var expectedRecords, doNotDelete []*lbcfapi.BackendRecord
+
+	klog.Infof("=====BackendGroup %s/%s has %d lb", group.Namespace, group.Name, len(lbList))
 	for _, lb := range lbList {
 		// the requirement of registering a Pod is always pod.status.conditions[].Ready = True
 		for _, pod := range util.FilterPods(pods, util.PodAvailable) {
@@ -228,6 +245,7 @@ func (c *backendGroupController) expectedPodBackends(
 				r.Spec.LBName, group.Namespace, group.Name, r.Spec.PodBackendInfo.Name)
 		}
 	}
+	klog.Infof("=====BackendGroup %s/%s has %d expectedRecords", group.Namespace, group.Name, len(expectedRecords))
 	return expectedRecords, doNotDelete, nil
 }
 
