@@ -21,7 +21,7 @@ APIS_VERSIONS ?= $(foreach api,${API_DIR},$(notdir ${api}))
 # Determine api group versions
 API_GROUP_VERSIONS ?= $(foreach api_version,$(APIS_VERSIONS),lbcf.tkestack.io:$(api_version))
 # set the code-generator image version
-CODE_GENERATOR_VERSION = v1.17.0-3
+CODE_GENERATOR_VERSION = v1.18.2
 
 .PHONY: gen.run
 gen.run: gen.clean gen.generator gen.api

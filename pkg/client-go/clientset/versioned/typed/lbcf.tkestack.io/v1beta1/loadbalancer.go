@@ -2,7 +2,7 @@
  * Tencent is pleased to support the open source community by making TKEStack
  * available.
  *
- * Copyright (C) 2012-2019 Tencent. All Rights Reserved.
+ * Copyright (C) 2012-2020 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -21,6 +21,7 @@
 package v1beta1
 
 import (
+	"context"
 	"time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,15 +40,15 @@ type LoadBalancersGetter interface {
 
 // LoadBalancerInterface has methods to work with LoadBalancer resources.
 type LoadBalancerInterface interface {
-	Create(*v1beta1.LoadBalancer) (*v1beta1.LoadBalancer, error)
-	Update(*v1beta1.LoadBalancer) (*v1beta1.LoadBalancer, error)
-	UpdateStatus(*v1beta1.LoadBalancer) (*v1beta1.LoadBalancer, error)
-	Delete(name string, options *v1.DeleteOptions) error
-	DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error
-	Get(name string, options v1.GetOptions) (*v1beta1.LoadBalancer, error)
-	List(opts v1.ListOptions) (*v1beta1.LoadBalancerList, error)
-	Watch(opts v1.ListOptions) (watch.Interface, error)
-	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1beta1.LoadBalancer, err error)
+	Create(ctx context.Context, loadBalancer *v1beta1.LoadBalancer, opts v1.CreateOptions) (*v1beta1.LoadBalancer, error)
+	Update(ctx context.Context, loadBalancer *v1beta1.LoadBalancer, opts v1.UpdateOptions) (*v1beta1.LoadBalancer, error)
+	UpdateStatus(ctx context.Context, loadBalancer *v1beta1.LoadBalancer, opts v1.UpdateOptions) (*v1beta1.LoadBalancer, error)
+	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
+	DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
+	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1beta1.LoadBalancer, error)
+	List(ctx context.Context, opts v1.ListOptions) (*v1beta1.LoadBalancerList, error)
+	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
+	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.LoadBalancer, err error)
 	LoadBalancerExpansion
 }
 
@@ -66,20 +67,20 @@ func newLoadBalancers(c *LbcfV1beta1Client, namespace string) *loadBalancers {
 }
 
 // Get takes name of the loadBalancer, and returns the corresponding loadBalancer object, and an error if there is any.
-func (c *loadBalancers) Get(name string, options v1.GetOptions) (result *v1beta1.LoadBalancer, err error) {
+func (c *loadBalancers) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.LoadBalancer, err error) {
 	result = &v1beta1.LoadBalancer{}
 	err = c.client.Get().
 		Namespace(c.ns).
 		Resource("loadbalancers").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // List takes label and field selectors, and returns the list of LoadBalancers that match those selectors.
-func (c *loadBalancers) List(opts v1.ListOptions) (result *v1beta1.LoadBalancerList, err error) {
+func (c *loadBalancers) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.LoadBalancerList, err error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -90,13 +91,13 @@ func (c *loadBalancers) List(opts v1.ListOptions) (result *v1beta1.LoadBalancerL
 		Resource("loadbalancers").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Watch returns a watch.Interface that watches the requested loadBalancers.
-func (c *loadBalancers) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *loadBalancers) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -107,87 +108,90 @@ func (c *loadBalancers) Watch(opts v1.ListOptions) (watch.Interface, error) {
 		Resource("loadbalancers").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Watch()
+		Watch(ctx)
 }
 
 // Create takes the representation of a loadBalancer and creates it.  Returns the server's representation of the loadBalancer, and an error, if there is any.
-func (c *loadBalancers) Create(loadBalancer *v1beta1.LoadBalancer) (result *v1beta1.LoadBalancer, err error) {
+func (c *loadBalancers) Create(ctx context.Context, loadBalancer *v1beta1.LoadBalancer, opts v1.CreateOptions) (result *v1beta1.LoadBalancer, err error) {
 	result = &v1beta1.LoadBalancer{}
 	err = c.client.Post().
 		Namespace(c.ns).
 		Resource("loadbalancers").
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(loadBalancer).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Update takes the representation of a loadBalancer and updates it. Returns the server's representation of the loadBalancer, and an error, if there is any.
-func (c *loadBalancers) Update(loadBalancer *v1beta1.LoadBalancer) (result *v1beta1.LoadBalancer, err error) {
+func (c *loadBalancers) Update(ctx context.Context, loadBalancer *v1beta1.LoadBalancer, opts v1.UpdateOptions) (result *v1beta1.LoadBalancer, err error) {
 	result = &v1beta1.LoadBalancer{}
 	err = c.client.Put().
 		Namespace(c.ns).
 		Resource("loadbalancers").
 		Name(loadBalancer.Name).
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(loadBalancer).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-
-func (c *loadBalancers) UpdateStatus(loadBalancer *v1beta1.LoadBalancer) (result *v1beta1.LoadBalancer, err error) {
+func (c *loadBalancers) UpdateStatus(ctx context.Context, loadBalancer *v1beta1.LoadBalancer, opts v1.UpdateOptions) (result *v1beta1.LoadBalancer, err error) {
 	result = &v1beta1.LoadBalancer{}
 	err = c.client.Put().
 		Namespace(c.ns).
 		Resource("loadbalancers").
 		Name(loadBalancer.Name).
 		SubResource("status").
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(loadBalancer).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Delete takes name of the loadBalancer and deletes it. Returns an error if one occurs.
-func (c *loadBalancers) Delete(name string, options *v1.DeleteOptions) error {
+func (c *loadBalancers) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("loadbalancers").
 		Name(name).
-		Body(options).
-		Do().
+		Body(&opts).
+		Do(ctx).
 		Error()
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *loadBalancers) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
+func (c *loadBalancers) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
 	var timeout time.Duration
-	if listOptions.TimeoutSeconds != nil {
-		timeout = time.Duration(*listOptions.TimeoutSeconds) * time.Second
+	if listOpts.TimeoutSeconds != nil {
+		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("loadbalancers").
-		VersionedParams(&listOptions, scheme.ParameterCodec).
+		VersionedParams(&listOpts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Body(options).
-		Do().
+		Body(&opts).
+		Do(ctx).
 		Error()
 }
 
 // Patch applies the patch and returns the patched loadBalancer.
-func (c *loadBalancers) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1beta1.LoadBalancer, err error) {
+func (c *loadBalancers) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.LoadBalancer, err error) {
 	result = &v1beta1.LoadBalancer{}
 	err = c.client.Patch(pt).
 		Namespace(c.ns).
 		Resource("loadbalancers").
-		SubResource(subresources...).
 		Name(name).
+		SubResource(subresources...).
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(data).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }

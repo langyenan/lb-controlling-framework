@@ -2,7 +2,7 @@
  * Tencent is pleased to support the open source community by making TKEStack
  * available.
  *
- * Copyright (C) 2012-2019 Tencent. All Rights Reserved.
+ * Copyright (C) 2012-2020 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -21,6 +21,8 @@
 package fake
 
 import (
+	"context"
+
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -41,7 +43,7 @@ var backendgroupsResource = schema.GroupVersionResource{Group: "lbcf.tkestack.io
 var backendgroupsKind = schema.GroupVersionKind{Group: "lbcf.tkestack.io", Version: "v1beta1", Kind: "BackendGroup"}
 
 // Get takes name of the backendGroup, and returns the corresponding backendGroup object, and an error if there is any.
-func (c *FakeBackendGroups) Get(name string, options v1.GetOptions) (result *v1beta1.BackendGroup, err error) {
+func (c *FakeBackendGroups) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.BackendGroup, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(backendgroupsResource, c.ns, name), &v1beta1.BackendGroup{})
 
@@ -52,7 +54,7 @@ func (c *FakeBackendGroups) Get(name string, options v1.GetOptions) (result *v1b
 }
 
 // List takes label and field selectors, and returns the list of BackendGroups that match those selectors.
-func (c *FakeBackendGroups) List(opts v1.ListOptions) (result *v1beta1.BackendGroupList, err error) {
+func (c *FakeBackendGroups) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.BackendGroupList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(backendgroupsResource, backendgroupsKind, c.ns, opts), &v1beta1.BackendGroupList{})
 
@@ -74,14 +76,14 @@ func (c *FakeBackendGroups) List(opts v1.ListOptions) (result *v1beta1.BackendGr
 }
 
 // Watch returns a watch.Interface that watches the requested backendGroups.
-func (c *FakeBackendGroups) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeBackendGroups) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(backendgroupsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a backendGroup and creates it.  Returns the server's representation of the backendGroup, and an error, if there is any.
-func (c *FakeBackendGroups) Create(backendGroup *v1beta1.BackendGroup) (result *v1beta1.BackendGroup, err error) {
+func (c *FakeBackendGroups) Create(ctx context.Context, backendGroup *v1beta1.BackendGroup, opts v1.CreateOptions) (result *v1beta1.BackendGroup, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewCreateAction(backendgroupsResource, c.ns, backendGroup), &v1beta1.BackendGroup{})
 
@@ -92,7 +94,7 @@ func (c *FakeBackendGroups) Create(backendGroup *v1beta1.BackendGroup) (result *
 }
 
 // Update takes the representation of a backendGroup and updates it. Returns the server's representation of the backendGroup, and an error, if there is any.
-func (c *FakeBackendGroups) Update(backendGroup *v1beta1.BackendGroup) (result *v1beta1.BackendGroup, err error) {
+func (c *FakeBackendGroups) Update(ctx context.Context, backendGroup *v1beta1.BackendGroup, opts v1.UpdateOptions) (result *v1beta1.BackendGroup, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateAction(backendgroupsResource, c.ns, backendGroup), &v1beta1.BackendGroup{})
 
@@ -104,7 +106,7 @@ func (c *FakeBackendGroups) Update(backendGroup *v1beta1.BackendGroup) (result *
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeBackendGroups) UpdateStatus(backendGroup *v1beta1.BackendGroup) (*v1beta1.BackendGroup, error) {
+func (c *FakeBackendGroups) UpdateStatus(ctx context.Context, backendGroup *v1beta1.BackendGroup, opts v1.UpdateOptions) (*v1beta1.BackendGroup, error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateSubresourceAction(backendgroupsResource, "status", c.ns, backendGroup), &v1beta1.BackendGroup{})
 
@@ -115,7 +117,7 @@ func (c *FakeBackendGroups) UpdateStatus(backendGroup *v1beta1.BackendGroup) (*v
 }
 
 // Delete takes name of the backendGroup and deletes it. Returns an error if one occurs.
-func (c *FakeBackendGroups) Delete(name string, options *v1.DeleteOptions) error {
+func (c *FakeBackendGroups) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
 		Invokes(testing.NewDeleteAction(backendgroupsResource, c.ns, name), &v1beta1.BackendGroup{})
 
@@ -123,15 +125,15 @@ func (c *FakeBackendGroups) Delete(name string, options *v1.DeleteOptions) error
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeBackendGroups) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(backendgroupsResource, c.ns, listOptions)
+func (c *FakeBackendGroups) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+	action := testing.NewDeleteCollectionAction(backendgroupsResource, c.ns, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1beta1.BackendGroupList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched backendGroup.
-func (c *FakeBackendGroups) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1beta1.BackendGroup, err error) {
+func (c *FakeBackendGroups) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.BackendGroup, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(backendgroupsResource, c.ns, name, pt, data, subresources...), &v1beta1.BackendGroup{})
 

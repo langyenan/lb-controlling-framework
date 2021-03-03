@@ -2,7 +2,7 @@
  * Tencent is pleased to support the open source community by making TKEStack
  * available.
  *
- * Copyright (C) 2012-2019 Tencent. All Rights Reserved.
+ * Copyright (C) 2012-2020 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -21,6 +21,8 @@
 package fake
 
 import (
+	"context"
+
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -41,7 +43,7 @@ var backendrecordsResource = schema.GroupVersionResource{Group: "lbcf.tkestack.i
 var backendrecordsKind = schema.GroupVersionKind{Group: "lbcf.tkestack.io", Version: "v1beta1", Kind: "BackendRecord"}
 
 // Get takes name of the backendRecord, and returns the corresponding backendRecord object, and an error if there is any.
-func (c *FakeBackendRecords) Get(name string, options v1.GetOptions) (result *v1beta1.BackendRecord, err error) {
+func (c *FakeBackendRecords) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.BackendRecord, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(backendrecordsResource, c.ns, name), &v1beta1.BackendRecord{})
 
@@ -52,7 +54,7 @@ func (c *FakeBackendRecords) Get(name string, options v1.GetOptions) (result *v1
 }
 
 // List takes label and field selectors, and returns the list of BackendRecords that match those selectors.
-func (c *FakeBackendRecords) List(opts v1.ListOptions) (result *v1beta1.BackendRecordList, err error) {
+func (c *FakeBackendRecords) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.BackendRecordList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(backendrecordsResource, backendrecordsKind, c.ns, opts), &v1beta1.BackendRecordList{})
 
@@ -74,14 +76,14 @@ func (c *FakeBackendRecords) List(opts v1.ListOptions) (result *v1beta1.BackendR
 }
 
 // Watch returns a watch.Interface that watches the requested backendRecords.
-func (c *FakeBackendRecords) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeBackendRecords) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(backendrecordsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a backendRecord and creates it.  Returns the server's representation of the backendRecord, and an error, if there is any.
-func (c *FakeBackendRecords) Create(backendRecord *v1beta1.BackendRecord) (result *v1beta1.BackendRecord, err error) {
+func (c *FakeBackendRecords) Create(ctx context.Context, backendRecord *v1beta1.BackendRecord, opts v1.CreateOptions) (result *v1beta1.BackendRecord, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewCreateAction(backendrecordsResource, c.ns, backendRecord), &v1beta1.BackendRecord{})
 
@@ -92,7 +94,7 @@ func (c *FakeBackendRecords) Create(backendRecord *v1beta1.BackendRecord) (resul
 }
 
 // Update takes the representation of a backendRecord and updates it. Returns the server's representation of the backendRecord, and an error, if there is any.
-func (c *FakeBackendRecords) Update(backendRecord *v1beta1.BackendRecord) (result *v1beta1.BackendRecord, err error) {
+func (c *FakeBackendRecords) Update(ctx context.Context, backendRecord *v1beta1.BackendRecord, opts v1.UpdateOptions) (result *v1beta1.BackendRecord, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateAction(backendrecordsResource, c.ns, backendRecord), &v1beta1.BackendRecord{})
 
@@ -104,7 +106,7 @@ func (c *FakeBackendRecords) Update(backendRecord *v1beta1.BackendRecord) (resul
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeBackendRecords) UpdateStatus(backendRecord *v1beta1.BackendRecord) (*v1beta1.BackendRecord, error) {
+func (c *FakeBackendRecords) UpdateStatus(ctx context.Context, backendRecord *v1beta1.BackendRecord, opts v1.UpdateOptions) (*v1beta1.BackendRecord, error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateSubresourceAction(backendrecordsResource, "status", c.ns, backendRecord), &v1beta1.BackendRecord{})
 
@@ -115,7 +117,7 @@ func (c *FakeBackendRecords) UpdateStatus(backendRecord *v1beta1.BackendRecord) 
 }
 
 // Delete takes name of the backendRecord and deletes it. Returns an error if one occurs.
-func (c *FakeBackendRecords) Delete(name string, options *v1.DeleteOptions) error {
+func (c *FakeBackendRecords) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
 		Invokes(testing.NewDeleteAction(backendrecordsResource, c.ns, name), &v1beta1.BackendRecord{})
 
@@ -123,15 +125,15 @@ func (c *FakeBackendRecords) Delete(name string, options *v1.DeleteOptions) erro
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeBackendRecords) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(backendrecordsResource, c.ns, listOptions)
+func (c *FakeBackendRecords) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+	action := testing.NewDeleteCollectionAction(backendrecordsResource, c.ns, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1beta1.BackendRecordList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched backendRecord.
-func (c *FakeBackendRecords) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1beta1.BackendRecord, err error) {
+func (c *FakeBackendRecords) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.BackendRecord, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(backendrecordsResource, c.ns, name, pt, data, subresources...), &v1beta1.BackendRecord{})
 

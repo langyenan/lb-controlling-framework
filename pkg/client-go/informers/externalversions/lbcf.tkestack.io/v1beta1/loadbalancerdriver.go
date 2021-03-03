@@ -2,7 +2,7 @@
  * Tencent is pleased to support the open source community by making TKEStack
  * available.
  *
- * Copyright (C) 2012-2019 Tencent. All Rights Reserved.
+ * Copyright (C) 2012-2020 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -21,6 +21,7 @@
 package v1beta1
 
 import (
+	"context"
 	time "time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -63,13 +64,13 @@ func NewFilteredLoadBalancerDriverInformer(client versioned.Interface, namespace
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.LbcfV1beta1().LoadBalancerDrivers(namespace).List(options)
+				return client.LbcfV1beta1().LoadBalancerDrivers(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.LbcfV1beta1().LoadBalancerDrivers(namespace).Watch(options)
+				return client.LbcfV1beta1().LoadBalancerDrivers(namespace).Watch(context.TODO(), options)
 			},
 		},
 		&lbcftkestackiov1beta1.LoadBalancerDriver{},

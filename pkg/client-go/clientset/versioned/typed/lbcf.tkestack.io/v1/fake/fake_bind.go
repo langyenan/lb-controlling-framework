@@ -2,7 +2,7 @@
  * Tencent is pleased to support the open source community by making TKEStack
  * available.
  *
- * Copyright (C) 2012-2019 Tencent. All Rights Reserved.
+ * Copyright (C) 2012-2020 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -21,6 +21,8 @@
 package fake
 
 import (
+	"context"
+
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -41,7 +43,7 @@ var bindsResource = schema.GroupVersionResource{Group: "lbcf.tkestack.io", Versi
 var bindsKind = schema.GroupVersionKind{Group: "lbcf.tkestack.io", Version: "v1", Kind: "Bind"}
 
 // Get takes name of the bind, and returns the corresponding bind object, and an error if there is any.
-func (c *FakeBinds) Get(name string, options v1.GetOptions) (result *lbcftkestackiov1.Bind, err error) {
+func (c *FakeBinds) Get(ctx context.Context, name string, options v1.GetOptions) (result *lbcftkestackiov1.Bind, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(bindsResource, c.ns, name), &lbcftkestackiov1.Bind{})
 
@@ -52,7 +54,7 @@ func (c *FakeBinds) Get(name string, options v1.GetOptions) (result *lbcftkestac
 }
 
 // List takes label and field selectors, and returns the list of Binds that match those selectors.
-func (c *FakeBinds) List(opts v1.ListOptions) (result *lbcftkestackiov1.BindList, err error) {
+func (c *FakeBinds) List(ctx context.Context, opts v1.ListOptions) (result *lbcftkestackiov1.BindList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(bindsResource, bindsKind, c.ns, opts), &lbcftkestackiov1.BindList{})
 
@@ -74,14 +76,14 @@ func (c *FakeBinds) List(opts v1.ListOptions) (result *lbcftkestackiov1.BindList
 }
 
 // Watch returns a watch.Interface that watches the requested binds.
-func (c *FakeBinds) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeBinds) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(bindsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a bind and creates it.  Returns the server's representation of the bind, and an error, if there is any.
-func (c *FakeBinds) Create(bind *lbcftkestackiov1.Bind) (result *lbcftkestackiov1.Bind, err error) {
+func (c *FakeBinds) Create(ctx context.Context, bind *lbcftkestackiov1.Bind, opts v1.CreateOptions) (result *lbcftkestackiov1.Bind, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewCreateAction(bindsResource, c.ns, bind), &lbcftkestackiov1.Bind{})
 
@@ -92,7 +94,7 @@ func (c *FakeBinds) Create(bind *lbcftkestackiov1.Bind) (result *lbcftkestackiov
 }
 
 // Update takes the representation of a bind and updates it. Returns the server's representation of the bind, and an error, if there is any.
-func (c *FakeBinds) Update(bind *lbcftkestackiov1.Bind) (result *lbcftkestackiov1.Bind, err error) {
+func (c *FakeBinds) Update(ctx context.Context, bind *lbcftkestackiov1.Bind, opts v1.UpdateOptions) (result *lbcftkestackiov1.Bind, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateAction(bindsResource, c.ns, bind), &lbcftkestackiov1.Bind{})
 
@@ -104,7 +106,7 @@ func (c *FakeBinds) Update(bind *lbcftkestackiov1.Bind) (result *lbcftkestackiov
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeBinds) UpdateStatus(bind *lbcftkestackiov1.Bind) (*lbcftkestackiov1.Bind, error) {
+func (c *FakeBinds) UpdateStatus(ctx context.Context, bind *lbcftkestackiov1.Bind, opts v1.UpdateOptions) (*lbcftkestackiov1.Bind, error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateSubresourceAction(bindsResource, "status", c.ns, bind), &lbcftkestackiov1.Bind{})
 
@@ -115,7 +117,7 @@ func (c *FakeBinds) UpdateStatus(bind *lbcftkestackiov1.Bind) (*lbcftkestackiov1
 }
 
 // Delete takes name of the bind and deletes it. Returns an error if one occurs.
-func (c *FakeBinds) Delete(name string, options *v1.DeleteOptions) error {
+func (c *FakeBinds) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
 		Invokes(testing.NewDeleteAction(bindsResource, c.ns, name), &lbcftkestackiov1.Bind{})
 
@@ -123,15 +125,15 @@ func (c *FakeBinds) Delete(name string, options *v1.DeleteOptions) error {
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeBinds) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(bindsResource, c.ns, listOptions)
+func (c *FakeBinds) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+	action := testing.NewDeleteCollectionAction(bindsResource, c.ns, listOpts)
 
 	_, err := c.Fake.Invokes(action, &lbcftkestackiov1.BindList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched bind.
-func (c *FakeBinds) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *lbcftkestackiov1.Bind, err error) {
+func (c *FakeBinds) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *lbcftkestackiov1.Bind, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(bindsResource, c.ns, name, pt, data, subresources...), &lbcftkestackiov1.Bind{})
 

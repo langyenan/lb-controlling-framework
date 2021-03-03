@@ -2,7 +2,7 @@
  * Tencent is pleased to support the open source community by making TKEStack
  * available.
  *
- * Copyright (C) 2012-2019 Tencent. All Rights Reserved.
+ * Copyright (C) 2012-2020 Tencent. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -21,6 +21,7 @@
 package v1beta1
 
 import (
+	"context"
 	"time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,15 +40,15 @@ type LoadBalancerDriversGetter interface {
 
 // LoadBalancerDriverInterface has methods to work with LoadBalancerDriver resources.
 type LoadBalancerDriverInterface interface {
-	Create(*v1beta1.LoadBalancerDriver) (*v1beta1.LoadBalancerDriver, error)
-	Update(*v1beta1.LoadBalancerDriver) (*v1beta1.LoadBalancerDriver, error)
-	UpdateStatus(*v1beta1.LoadBalancerDriver) (*v1beta1.LoadBalancerDriver, error)
-	Delete(name string, options *v1.DeleteOptions) error
-	DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error
-	Get(name string, options v1.GetOptions) (*v1beta1.LoadBalancerDriver, error)
-	List(opts v1.ListOptions) (*v1beta1.LoadBalancerDriverList, error)
-	Watch(opts v1.ListOptions) (watch.Interface, error)
-	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1beta1.LoadBalancerDriver, err error)
+	Create(ctx context.Context, loadBalancerDriver *v1beta1.LoadBalancerDriver, opts v1.CreateOptions) (*v1beta1.LoadBalancerDriver, error)
+	Update(ctx context.Context, loadBalancerDriver *v1beta1.LoadBalancerDriver, opts v1.UpdateOptions) (*v1beta1.LoadBalancerDriver, error)
+	UpdateStatus(ctx context.Context, loadBalancerDriver *v1beta1.LoadBalancerDriver, opts v1.UpdateOptions) (*v1beta1.LoadBalancerDriver, error)
+	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
+	DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
+	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1beta1.LoadBalancerDriver, error)
+	List(ctx context.Context, opts v1.ListOptions) (*v1beta1.LoadBalancerDriverList, error)
+	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
+	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.LoadBalancerDriver, err error)
 	LoadBalancerDriverExpansion
 }
 
@@ -66,20 +67,20 @@ func newLoadBalancerDrivers(c *LbcfV1beta1Client, namespace string) *loadBalance
 }
 
 // Get takes name of the loadBalancerDriver, and returns the corresponding loadBalancerDriver object, and an error if there is any.
-func (c *loadBalancerDrivers) Get(name string, options v1.GetOptions) (result *v1beta1.LoadBalancerDriver, err error) {
+func (c *loadBalancerDrivers) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.LoadBalancerDriver, err error) {
 	result = &v1beta1.LoadBalancerDriver{}
 	err = c.client.Get().
 		Namespace(c.ns).
 		Resource("loadbalancerdrivers").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // List takes label and field selectors, and returns the list of LoadBalancerDrivers that match those selectors.
-func (c *loadBalancerDrivers) List(opts v1.ListOptions) (result *v1beta1.LoadBalancerDriverList, err error) {
+func (c *loadBalancerDrivers) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.LoadBalancerDriverList, err error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -90,13 +91,13 @@ func (c *loadBalancerDrivers) List(opts v1.ListOptions) (result *v1beta1.LoadBal
 		Resource("loadbalancerdrivers").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Watch returns a watch.Interface that watches the requested loadBalancerDrivers.
-func (c *loadBalancerDrivers) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *loadBalancerDrivers) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -107,87 +108,90 @@ func (c *loadBalancerDrivers) Watch(opts v1.ListOptions) (watch.Interface, error
 		Resource("loadbalancerdrivers").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Watch()
+		Watch(ctx)
 }
 
 // Create takes the representation of a loadBalancerDriver and creates it.  Returns the server's representation of the loadBalancerDriver, and an error, if there is any.
-func (c *loadBalancerDrivers) Create(loadBalancerDriver *v1beta1.LoadBalancerDriver) (result *v1beta1.LoadBalancerDriver, err error) {
+func (c *loadBalancerDrivers) Create(ctx context.Context, loadBalancerDriver *v1beta1.LoadBalancerDriver, opts v1.CreateOptions) (result *v1beta1.LoadBalancerDriver, err error) {
 	result = &v1beta1.LoadBalancerDriver{}
 	err = c.client.Post().
 		Namespace(c.ns).
 		Resource("loadbalancerdrivers").
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(loadBalancerDriver).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Update takes the representation of a loadBalancerDriver and updates it. Returns the server's representation of the loadBalancerDriver, and an error, if there is any.
-func (c *loadBalancerDrivers) Update(loadBalancerDriver *v1beta1.LoadBalancerDriver) (result *v1beta1.LoadBalancerDriver, err error) {
+func (c *loadBalancerDrivers) Update(ctx context.Context, loadBalancerDriver *v1beta1.LoadBalancerDriver, opts v1.UpdateOptions) (result *v1beta1.LoadBalancerDriver, err error) {
 	result = &v1beta1.LoadBalancerDriver{}
 	err = c.client.Put().
 		Namespace(c.ns).
 		Resource("loadbalancerdrivers").
 		Name(loadBalancerDriver.Name).
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(loadBalancerDriver).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-
-func (c *loadBalancerDrivers) UpdateStatus(loadBalancerDriver *v1beta1.LoadBalancerDriver) (result *v1beta1.LoadBalancerDriver, err error) {
+func (c *loadBalancerDrivers) UpdateStatus(ctx context.Context, loadBalancerDriver *v1beta1.LoadBalancerDriver, opts v1.UpdateOptions) (result *v1beta1.LoadBalancerDriver, err error) {
 	result = &v1beta1.LoadBalancerDriver{}
 	err = c.client.Put().
 		Namespace(c.ns).
 		Resource("loadbalancerdrivers").
 		Name(loadBalancerDriver.Name).
 		SubResource("status").
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(loadBalancerDriver).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Delete takes name of the loadBalancerDriver and deletes it. Returns an error if one occurs.
-func (c *loadBalancerDrivers) Delete(name string, options *v1.DeleteOptions) error {
+func (c *loadBalancerDrivers) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("loadbalancerdrivers").
 		Name(name).
-		Body(options).
-		Do().
+		Body(&opts).
+		Do(ctx).
 		Error()
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *loadBalancerDrivers) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
+func (c *loadBalancerDrivers) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
 	var timeout time.Duration
-	if listOptions.TimeoutSeconds != nil {
-		timeout = time.Duration(*listOptions.TimeoutSeconds) * time.Second
+	if listOpts.TimeoutSeconds != nil {
+		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("loadbalancerdrivers").
-		VersionedParams(&listOptions, scheme.ParameterCodec).
+		VersionedParams(&listOpts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Body(options).
-		Do().
+		Body(&opts).
+		Do(ctx).
 		Error()
 }
 
 // Patch applies the patch and returns the patched loadBalancerDriver.
-func (c *loadBalancerDrivers) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1beta1.LoadBalancerDriver, err error) {
+func (c *loadBalancerDrivers) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.LoadBalancerDriver, err error) {
 	result = &v1beta1.LoadBalancerDriver{}
 	err = c.client.Patch(pt).
 		Namespace(c.ns).
 		Resource("loadbalancerdrivers").
-		SubResource(subresources...).
 		Name(name).
+		SubResource(subresources...).
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(data).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
